@@ -61,7 +61,7 @@ cp .env.example .env
 2. Edit the `.env` file with your settings:
 ```env
 # Required: GitHub repository to monitor
-GITHUB_REPO_URL=owner/repo
+GITHUB_REPO_URL=https://github.com/owner/repo
 
 # Recommended: Your GitHub Personal Access Token
 GITHUB_TOKEN=github_pat_your_token_here
