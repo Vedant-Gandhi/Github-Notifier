@@ -1,0 +1,28 @@
+# Ignore all .env files
+.env*
+
+# But allow .env.example
+!.env.example
+
+# Binary files
+github-notifier
+github-notifier.exe
+
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
