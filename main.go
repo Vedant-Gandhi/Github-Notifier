@@ -4,8 +4,11 @@ import (
 	"context"
 	"gitnotifier/config"
 	"gitnotifier/internal/github"
-	"gitnotifier/internal/notification"
+	"gitnotifier/internal/notifier"
+	"gitnotifier/internal/repository"
+	"gitnotifier/internal/service"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -42,8 +45,27 @@ func main() {
 		}
 	}
 
+	// Create HTTP client
+	client := &http.Client{
+		Timeout: config.HTTPTimeout,
+	}
+
+	// Initialize repository
+	githubRepo := repository.NewRepository(
+		client,
+		owner,
+		repo,
+		os.Getenv("GITHUB_TOKEN"),
+	)
+
+	// Initialize platform-specific notifier
+	notifier, err := notifier.NewPlatformNotifier()
+	if err != nil {
+		log.Fatalf("Failed to initialize notifier: %v", err)
+	}
+
 	// Create notification service
-	service := notification.NewService(owner, repo, pollInterval)
+	service := service.NewService(githubRepo, notifier, pollInterval)
 
 	// Setup context with cancellation
 	ctx, cancel := context.WithCancel(context.Background())
