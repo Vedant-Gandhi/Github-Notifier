@@ -31,9 +31,10 @@ func NewRepository(client *http.Client, owner, repo, token string) *Repository {
 	}
 }
 
-// FetchLatestIssues fetches the latest issues from GitHub
+// FetchLatestIssues fetches the latest issues (excluding pull requests) from GitHub
 func (r *Repository) FetchLatestIssues(ctx context.Context) ([]issue.Issue, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/issues?state=open&sort=created&direction=desc&per_page=10",
+	// Note the addition of `is:issue` to exclude pull requests
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/issues?state=open&sort=created&direction=desc&per_page=10&is=issue",
 		r.owner, r.repo)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -66,5 +67,14 @@ func (r *Repository) FetchLatestIssues(ctx context.Context) ([]issue.Issue, erro
 		return nil, fmt.Errorf("error decoding response: %v", err)
 	}
 
-	return issues, nil
+	// Additional check to filter out any pull requests that might have slipped through
+	var filteredIssues []issue.Issue
+	for _, issue := range issues {
+		// GitHub Pull Requests have a "pull_request" field
+		if issue.PullRequest == nil {
+			filteredIssues = append(filteredIssues, issue)
+		}
+	}
+
+	return filteredIssues, nil
 }

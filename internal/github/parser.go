@@ -6,18 +6,22 @@ import (
 )
 
 // ParseGitHubURL parses a GitHub repository URL into owner and repo parts
+// Only accepts full GitHub URLs in the format: https://github.com/owner/repo
 func ParseGitHubURL(url string) (owner, repo string, err error) {
 	url = strings.TrimSpace(url)
 	url = strings.TrimSuffix(url, "/")
 	url = strings.TrimSuffix(url, "/issues")
 
-	if strings.HasPrefix(url, "https://github.com/") {
-		url = strings.TrimPrefix(url, "https://github.com/")
+	if !strings.HasPrefix(url, "https://github.com/") {
+		return "", "", fmt.Errorf("invalid GitHub URL format. URL must start with 'https://github.com/'")
 	}
 
-	parts := strings.Split(url, "/")
+	// Remove the prefix to get owner/repo part
+	repoPath := strings.TrimPrefix(url, "https://github.com/")
+	parts := strings.Split(repoPath, "/")
+
 	if len(parts) != 2 {
-		return "", "", fmt.Errorf("invalid GitHub URL format. Expected 'owner/repo' or 'https://github.com/owner/repo'")
+		return "", "", fmt.Errorf("invalid GitHub URL format. Expected 'https://github.com/owner/repo'")
 	}
 
 	if parts[0] == "" || parts[1] == "" {
