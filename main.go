@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"gitnotifier/config"
 	"gitnotifier/internal/github"
 	"gitnotifier/internal/notifier"
@@ -18,11 +19,20 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
+	// Add command line flag for env file path
+	envFile := flag.String("env", "", "Path to environment file")
+	flag.Parse()
+
+	// Load environment file if specified, otherwise try default .env
+	if *envFile != "" {
+		if err := godotenv.Load(*envFile); err != nil {
+			log.Fatalf("Error loading environment file %s: %v", *envFile, err)
+		}
+	} else if err := godotenv.Load(); err != nil {
 		log.Printf("Error loading .env file: %v", err)
 	}
 
-	// Get repository URL from environment
+	// Rest of the code remains the same
 	repoURL := os.Getenv("GITHUB_REPO_URL")
 	if repoURL == "" {
 		log.Fatal("GITHUB_REPO_URL environment variable is not set")
